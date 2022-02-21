@@ -1,15 +1,14 @@
-package Controller;
+package ControllerAndView;
 
 import Model.*;
 import Repositories.*;
-
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
 
-    RepositorySelector repositorySelector = new RepositorySelector();
-    RepCustomer customerHandlder = new RepCustomer();
+    RepositoryCaller repositoryCaller = new RepositoryCaller();
+    RepCustomer customerHandler = new RepCustomer();
     ProcedureCaller procedureCaller = new ProcedureCaller();
 
     public Main() {
@@ -17,14 +16,14 @@ public class Main {
         List<ShoeType> shoeTypeList = new RepShoeType().getShoeTypeList();
         List<Shoe> shoeList = new RepShoe().getShoesList(brandList);
         new RepTypeOfShoe().connectShoeToType(shoeList,shoeTypeList);
-
+        List<Grade> gradeList = new RepGrade().getGradeList();
 
         Scanner sc = new Scanner(System.in);
         while (true){
             System.out.println("Enter your firstname lastname and password");
-            int id = customerHandlder.VerifyLogin(sc.next(), sc.next(), sc.next());
+            int id = customerHandler.VerifyLogin(sc.next(), sc.next(), sc.next());
             if (id > 0){
-                Customer user = customerHandlder.loginCustomer(id);
+                Customer user = customerHandler.loginCustomer(id);
                 int choice = 1;
                 while (choice >= 0){
                     System.out.println("1. Browse shop \n2.View Orders \n-1.Logout");
@@ -37,10 +36,11 @@ public class Main {
                         System.out.println(-1 + ". Go Back");
 
                         choice = sc.nextInt()-1;
-                        if (choice < 0 || choice > shoeList.size()){
+                        int shoeId = choice+1;
+                        if (choice < 0 || choice >= shoeList.size()){
                             choice = 0;
                         }else {
-                            List<PairOfShoes> pairOfShoesList = repositorySelector.getlistPairOfShoes(shoeList.get(choice));
+                            List<PairOfShoes> pairOfShoesList = repositoryCaller.getlistPairOfShoes(shoeList.get(choice));
                             System.out.println("Add to cart");
                             int n;
                             for (n = 0; n < pairOfShoesList.size(); n++) {
@@ -51,7 +51,22 @@ public class Main {
                             System.out.println(-1 + ". Go Back");
 
                             choice = sc.nextInt()-1;
-                            if (choice < 0 || choice > pairOfShoesList.size()){
+                            if (choice == pairOfShoesList.size()+1){
+                                System.out.println("Give shoe a score:");
+                                for (Grade grade:gradeList) {
+                                    System.out.println(grade.getValue() + " " + grade.getKeyword());
+                                }
+                                int score = sc.nextInt();
+                                sc.nextLine();
+                                System.out.println("Comment:");
+                                String comment = sc.nextLine();
+                                System.out.println(comment);
+                                System.out.println(procedureCaller.procedureRate(user.getId(),shoeId,gradeList.stream().filter(e -> e.getValue()==score).toList().get(0).getId(),comment));
+                            }
+                            else if (choice == pairOfShoesList.size()){
+                                System.out.println(repositoryCaller.getRating(shoeId));
+                            }
+                            else if (choice < 0 || choice >= pairOfShoesList.size()){
                                 choice = 0;
                             }else {
                                 PairOfShoes chosenShoe = pairOfShoesList.get(choice);
@@ -77,10 +92,14 @@ public class Main {
                         }
                         System.out.println(-1 +". Go back");
                         choice = sc.nextInt()-1;
-                        if (choice< 0 || choice >= user.getOrderList().size()){
+                        if (choice== -2 ){
+                            choice = 0;
+                        }
+                        else if (choice< 0 || choice >= user.getOrderList().size()){
                             System.out.println("Invalid input");
+                            choice= 0;
                         }else{
-                            user.getOrderList().get(choice).setListPairOfShoes(repositorySelector.getOrderedItemsList(user.getOrderList().get(choice),shoeList));
+                            user.getOrderList().get(choice).setListPairOfShoes(repositoryCaller.getOrderedItemsList(user.getOrderList().get(choice),shoeList));
                             for (int i = 0; i < user.getOrderList().get(choice).getListPairOfShoes().size(); i++) {
                                 System.out.println(user.getOrderList().get(choice).getListPairOfShoes().get(i).getShoe().toString());
                             }
@@ -89,13 +108,11 @@ public class Main {
                             sc.next();
                         }
                     }
-                    else if(choice==3){
-
-                    }
                 }
             }
             else{
                 System.out.println("Invalid login");
+                sc.nextLine();
             }
         }
 
@@ -106,4 +123,3 @@ public class Main {
         new Main();
     }
 }
-// Use me when user has chosen shoe model  List<PairOfShoes> sizesFromShoe = sizeSelector.getSizesFromShoe(pairOfShoesList, chosenShoe);

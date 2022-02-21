@@ -20,7 +20,7 @@ public class RepOrderedItems {
             e.printStackTrace();
         }
     }
-    public List<PairOfShoes> getOrderedItems(CustomerOrder customerOrder,List<Shoe> shoeList){
+    public List<PairOfShoes> getOrderedItems(CustomerOrder customerOrder, List<Shoe> shoeList){
 
         List<PairOfShoes> orderedItemsList = new ArrayList<>();
         try (Connection dbcon = DriverManager.getConnection(p.getProperty("connectionString"), p.getProperty("name"), p.getProperty("password"));
