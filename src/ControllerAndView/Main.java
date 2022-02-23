@@ -21,7 +21,7 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         while (true){
             System.out.println("Enter your firstname lastname and password");
-            int id = customerHandler.VerifyLogin(sc.next(), sc.next(), sc.next());
+            int id = customerHandler.VerifyLogin(sc.next().trim(), sc.next().trim(), sc.next().trim());
             if (id > 0){
                 Customer user = customerHandler.loginCustomer(id);
                 int choice = 1;
@@ -79,10 +79,12 @@ public class Main {
                                 int idOrder;
                                 if (choice < 0  || choice >= user.getOrderList().size()){
                                     idOrder = Integer.MAX_VALUE;
-                                }else
+                                }else {
                                     idOrder = user.getOrderList().get(choice).getId();
+                                }
                                 System.out.println(procedureCaller.addToCart(user,idOrder,chosenShoe));
                                 user.setOrderList(new RepCustomerOrder().getOrderList(user.getId()));
+                                choice = 0;
                             }
                         }
                     }else if(choice==2){
